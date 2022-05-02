@@ -1,0 +1,19 @@
+
+version: 2
+
+sources:
+  - name: stripe
+    schema: "{{ var('stripe_schema', 'stripe') }}"
+    database: "{% if target.type != 'spark'%}{{ var('stripe_database', target.database) }}{% endif %}"
+    tables:
+      - name: users
+
+models:
+  - name: stripe__users
+    description: "A table storing all user info."
+    columns:
+      - name: id
+        description: "The unique identifier for the issue being resolved"
+        tests:
+          - unique
+          - not_null

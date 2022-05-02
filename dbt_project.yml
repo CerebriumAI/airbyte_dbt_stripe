@@ -1,0 +1,26 @@
+name: 'stripe'
+version: '0.1.0'
+require-dbt-version: ['>=1.0.0']
+config-version: 2
+profile: 'default'
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  stripe:
+    materialized: table
+    intermediate:
+      materialized: ephemeral
+
+vars:
+  stripe:
+    users: "{{ source('stripe','users') }}"
