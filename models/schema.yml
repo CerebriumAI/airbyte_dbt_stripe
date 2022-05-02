@@ -1,19 +1,18 @@
-
 version: 2
 
 sources:
-  - name: stripe
+  - name: airbyte_stripe
     schema: "{{ var('stripe_schema', 'stripe') }}"
     database: "{% if target.type != 'spark'%}{{ var('stripe_database', target.database) }}{% endif %}"
     tables:
-      - name: users
+      - name: customers
 
 models:
-  - name: stripe__users
-    description: "A table storing all user info."
+  - name: stripe__customers
+    description: "A table storing all customer info"
     columns:
       - name: id
-        description: "The unique identifier for the issue being resolved"
+        description: "The unique identifier for the customer"
         tests:
           - unique
           - not_null

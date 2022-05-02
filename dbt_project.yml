@@ -16,11 +16,11 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  stripe:
+  airbyte_stripe:
     materialized: table
     intermediate:
       materialized: ephemeral
 
 vars:
-  stripe:
-    users: "{{ source('stripe','users') }}"
+  airbyte_stripe:
+    customers: "{{ source('airbyte_stripe','customers') }}"
