@@ -1,89 +1,72 @@
-with balance_transaction as (
-    select
-        id as balance_transaction_id,
-        created as created_at,
-        fee,
-        net as net_change,
-        type,
-        status,
-        amount,
-        currency,
-        exchange_rate
-    from {{ var('balance_transaction') }}
-),
-
-charges as (
-    select
-        id as charges_id
-        customer as customer_id,
-        receipt_email,
-        payment_intent as payment_intent_id,
-        created as charges_created_at
-    from {{ var('charges')}}
-),
-
-payment_intents as (
+with balance_transactions as (
     select
         *
-    from {{ var('payment_intents')}}
+    from {{ ref('stg_stripe__balance_transactions') }}
 ),
 
 cards as (
     select
-        *
-    from {{ var('card')}}
-), 
+        * 
+    from {{ ref('stg_stripe__charges_card')}}
+),
+
+charges as (
+    select
+        * 
+    from {{ ref('stg_stripe__charges')}}
+),
 
 payouts as (
     select
         *
-    from {{ var('payouts')}}
+    from {{ ref('stg_stripe__payouts')}}
 ), 
 
 customers as (
     select
         *
-    from {{ var('customers')}}
+    from {{ ref('stg_stripe__customers')}}
 ),
 
 refunds as (
     select
         *
-    from {{ var('refunds')}}
+    from {{ ref('stg_stripe__refunds')}}
 ),
 
-balance_transactions as (
-    select 
-        balance_transaction.*,
-        charges.*,
-        case (when balance_transaction.type = 'charges') then charges.amount end as customer_facing_amount, 
-        case (when balance_transaction.type = 'charges') then charges.currency end as customer_facing_currency,
-        customers.description as customer_description
-    --     cards.brand as card_brand,
-    --     cards.funding as card_funding,
-    --     cards.country as card_country,
-    --     payouts.payouts_id,
-    --     payouts.arrival_date as payouts_expected_arrival_date,
-    --     payouts.status as payouts_status,
-    --     payouts.type as payouts_type,
-    --     payouts.description as payouts_description,
-    --     refunds.reason as refunds_reason
-    from balance_transaction
-    
-    -- left join charges 
-    --     on charges.balance_transaction_id = balance_transaction.balance_transaction_id
-    -- left join customers 
-    --     on charges.customer_id = customers.customer_id
-    -- left join payment_intents 
-    --     on charges.payment_intents_id = payment_intents.payment_intents_id
-    -- left join cards 
-    --     on charges.card_id = cards.card_id
-    -- left join payouts 
-    --     on payouts.balance_transaction_id = balance_transaction.balance_transaction_id
-    -- left join refunds 
-    --     on refunds.balance_transaction_id = balance_transaction.balance_transaction_id
-    -- left join charges as refunds_charges 
-    --     on refunds.charges_id = refunds_charges.charges_id
+balance_transactions_summary as (
+    select
+        -- Balance Transactions
+        balance_transactions.*,
+        
+        -- Charges 
+        charges.charge_id,
+        charges.created_at as charge_created_at,
+        cards.card_brand,
+        cards.card_funding,
+        cards.card_country,
+        case when balance_transactions.type = 'charges' then charges.amount end as charge_amount, 
+        case when balance_transactions.type = 'charges' then charges.currency end as charge_currency,
+       
+       -- Customer details 
+        customers.description as customer_description,
+        payouts.payout_id,
+        payouts.arrival_date as payout_arrival_date,
+        payouts.status as payout_status,
+        payouts.type as payout_type,
+        payouts.description as payout_description,
+        refunds.refund_reason
+    from balance_transactions
+    left join charges 
+        using(balance_transaction_id)
+    left join cards
+        using(charges_hashid)
+    left join customers 
+        using(customer_id)
+    left join payouts 
+        using(balance_transaction_id)
+    left join refunds 
+        using(balance_transaction_id)
 )
 
-select * from balance_transactions
+select * from balance_transactions_summary

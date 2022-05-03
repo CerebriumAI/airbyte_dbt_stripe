@@ -1,4 +1,4 @@
-name: 'stripe'
+name: 'airbyte_stripe'
 version: '0.1.0'
 require-dbt-version: ['>=1.0.0']
 config-version: 2
@@ -18,9 +18,15 @@ clean-targets:
 models:
   airbyte_stripe:
     materialized: table
-    intermediate:
-      materialized: ephemeral
+    tmp:
+      materialized: view
 
 vars:
   airbyte_stripe:
     customers: "{{ source('airbyte_stripe','customers') }}"
+    balance_transactions: "{{ source('airbyte_stripe','balance_transactions') }}" 
+    charges_card: "{{ source('airbyte_stripe','charges_card') }}"
+    charges: "{{ source('airbyte_stripe','charges') }}"
+    payment_intents: "{{ source('airbyte_stripe','payment_intents') }}"
+    payouts: "{{ source('airbyte_stripe','payouts') }}"
+    refunds: "{{ source('airbyte_stripe','refunds') }}"

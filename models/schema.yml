@@ -6,7 +6,12 @@ sources:
     database: "{% if target.type != 'spark'%}{{ var('stripe_database', target.database) }}{% endif %}"
     tables:
       - name: customers
-
+      - name: balance_transactions
+      - name: charges_card
+      - name: charges
+      - name: payment_intents
+      - name: payouts
+      - name: refunds
 models:
   - name: stripe__customers
     description: "A table storing all customer info"
@@ -16,3 +21,71 @@ models:
         tests:
           - unique
           - not_null
+  - name: stripe__balance_transactions
+    description: "A table storing all balance transactions and associated charge data"
+    columns:
+      - name: balance_transaction_id
+        description: "The unique identifier for the balance transaction"
+        tests:
+          - unique
+          - not_null
+      - name: created_at
+        description: "The date the balance transaction was created"
+        tests:
+          - not_null
+      - name: fee
+        description: "The fee associated with the balance transaction"
+        tests:
+          - not_null
+      - name: net_balance_change
+        description: "The net balance change due to the balance transaction"
+        tests:
+          - not_null
+      - name: type
+        description: "The type of balance transaction"
+        tests:
+          - not_null
+      - name: status
+        description: "The status of balance transaction"
+        tests:
+          - not_null
+      - name: amount
+        description: "The total transaction amount"
+        tests:
+          - not_null
+      - name: currency
+        description: "The currency associated with the balance transaction"
+        tests:
+          - not_null
+      - name: exchange_rate
+        description: "The exchange rate used for the balance transaction"
+      - name: charge_id
+        description: "The id of the charge associated with the balance transaction"
+        tests:
+          - not_null
+      - name: charge_created_at
+        description: "The date the charge was created"
+      - name: card_brand
+        description: "The card brand associated with the charge"
+      - name: card_funding
+        description: "The card funding type associated with the charge"
+      - name: card_country
+        description: "The country of the card charged"
+      - name: charge_amount
+        description: "The total charge amount"
+      - name: charge_currency
+        description: "The currency associated with the charge"
+      - name: customer_description
+        description: "The customer description associated with balance transaction"
+      - name: payout_id
+        description: "The id of the payout associated with the balance transaction"
+      - name: payout_arrival_date
+        description: "The date the payout is due to arrive"
+      - name: payout_status
+        description: "The status of payout"
+      - name: payout_type
+        description: "The type of payout"
+      - name: payout_description
+        description: "The user specified source of the payout" 
+      - name: refund_reason
+        description: "The refund reason (if applicable)"
