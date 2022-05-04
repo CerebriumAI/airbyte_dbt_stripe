@@ -12,6 +12,12 @@ sources:
       - name: payment_intents
       - name: payouts
       - name: refunds
+      - name: invoice_line_items
+      - name: invoice_line_items_period
+      - name: invoice_line_items_plan
+      - name: invoices
+      - name: subscriptions
+      - name: plans
 models:
   - name: stripe__customers
     description: "A table storing all customer info"
@@ -89,3 +95,104 @@ models:
         description: "The user specified source of the payout" 
       - name: refund_reason
         description: "The refund reason (if applicable)"
+  - name: stripe__invoice_line_items
+    description: "A table storing all line items associated with an invoice"
+    columns:
+      - name: invoice_id
+        description: "The unique identifier for the balance transaction"
+        tests:
+          - unique
+          - not_null
+      - name: invoice_number
+        description: "The invoice number"
+        tests:
+          - not_null
+      - name: invoice_created_at
+        description: "The date the invoice was created"
+        tests:
+          - not_null
+      - name: status
+        description: "The status of the invoice"
+        tests:
+          - not_null
+      - name: due_date
+        description: "The due date of the invoice"
+        tests:
+          - not_null
+      - name: amount_due
+        description: "The total amount due for the invoice"
+        tests:
+          - not_null
+      - name: subtotal
+        description: "The subtotal amount for the invoice"
+        tests:
+          - not_null
+      - name: tax
+        description: "The tax amount for the invoice"
+        tests:
+          - not_null
+      - name: total
+        description: "The total amount for the invoice"
+        tests:
+          - not_null
+      - name: amount_paid
+        description: "The total amount paid for the invoice"
+      - name: amount_remaining
+        description: "The amount remaining to be paid for the invoice"
+      - name: attempt_count
+        description: "The number of attempts sent for this invoice"
+      - name: description
+        description: "The description of the invoice"
+      - name: invoice_line_item_id
+        description: "The unique id of the invoice line item"
+        tests:
+          - not_null
+          - unique
+      - name: line_item_description
+        description: "The description of the line item"
+      - name: line_item_amount
+        description: "The price of line item"
+      - name: line_item_quantity
+        description: "The total quantity of the line item"
+      - name: period_start
+        description: "The datetime of the period start for the invoice"
+      - name: period_end
+        description: "The datetime of the period end for the invoice"
+      - name: balance_transaction_id
+        description: "The unique id of the associated balance transaction"
+        tests:
+          - not_null
+      - name: charge_amount
+        description: "The amount charged for the line item"
+      - name: charge_status
+        description: "The status of the charge for the line item"
+      - name: charge_created_at
+        description: "The datetime when the charge for the line item was created"
+      - name: customer_description
+        description: "The description of the customer associated with line item purchase"
+      - name: customer_email
+        description: "The email of the customer associated with line item purchase"
+      - name: customer_id
+        description: "The unique id of the customer associated with line item purchase"
+      - name: subscription_id
+        description: "The unique id of the subscription purchase (if applicable)"
+      - name: subscription_billing
+        description: "The billing used for the subscription purchase"
+      - name: subscription_start_date
+        description: "The start date of the subscription purchase"
+      - name: subscription_end_date
+        description: "The end date of the subscription purchase"
+      - name: plan_id
+        description: "The plan associated with the purchased subscription"
+      - name: plan_is_active
+        description: "A flag for whether the subscription plan is active"
+      - name: plan_amount
+        description: "The total amount for the subscription plan"
+      - name: plan_interval
+        description: "The interval the subscription plan is charged at"
+      - name: plan_interval_count
+        description: "The number of intervals the subscription plan is charged"
+      - name: plan_nickname
+        description: "The nickname of the subscription plan"
+      - name: plan_product_id
+        description: "The unique id of the product associated with subscription plan"

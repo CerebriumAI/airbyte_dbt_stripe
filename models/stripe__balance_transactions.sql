@@ -45,11 +45,11 @@ balance_transactions_summary as (
         cards.card_brand,
         cards.card_funding,
         cards.card_country,
-        case when balance_transactions.type = 'charges' then charges.amount end as charge_amount, 
-        case when balance_transactions.type = 'charges' then charges.currency end as charge_currency,
+        case when balance_transactions.type = 'charges' then charges.charge_amount end as charge_amount, 
+        case when balance_transactions.type = 'charges' then charges.charge_currency end as charge_currency,
        
        -- Customer details 
-        customers.description as customer_description,
+        customers.customer_description,
         payouts.payout_id,
         payouts.arrival_date as payout_arrival_date,
         payouts.status as payout_status,

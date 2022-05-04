@@ -5,7 +5,8 @@ select
     receipt_email,
     payment_intent as payment_intent_id,
     created as created_at,
-    amount,
-    currency,
+    status as charge_status,
+    amount as charge_amount,
+    currency as charge_currency,
     balance_transaction as balance_transaction_id
 from {{ var('charges')}}
