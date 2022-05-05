@@ -86,15 +86,15 @@ line_items_summary as (
         plans.plan_product_id
     from invoices
     left join charges
-        on charges.charge_id = invoices.charge_id
+        using(charge_id)
     left join invoice_line_items
-        on invoices.invoice_id = invoice_line_items.invoice_id
+        using(invoice_id)
     left join subscriptions
         on invoice_line_items.subscription_id = subscriptions.subscription_id
     left join plans
         on invoice_line_items.plan_id = plans.plan_id
     left join customers
-        on invoices.customer_id = customers.customer_id
+        using(customer_id)
 )
 
 select * from line_items_summary
