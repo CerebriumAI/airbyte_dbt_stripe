@@ -36,3 +36,5 @@ vars:
     invoices: "{{ source('airbyte_stripe','invoices') }}"
     subscriptions: "{{ source('airbyte_stripe','subscriptions') }}"
     plans: "{{ source('airbyte_stripe','plans') }}"
+
+  "dbt_date:time_zone": "UTC"
