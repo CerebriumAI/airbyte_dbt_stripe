@@ -1,5 +1,13 @@
+with charges_card as (
+    select
+        _airbyte_charges_hashid,
+        brand as card_brand,
+        funding as card_funding,
+        country as card_country
+    from {{ var('charges_card')}}
+)
+
 select
-    _airbyte_charges_hashid as charges_hashid,
     id as charge_id,
     customer as customer_id,
     receipt_email,
@@ -8,5 +16,11 @@ select
     status as charge_status,
     amount as charge_amount,
     currency as charge_currency,
-    balance_transaction as balance_transaction_id
+    captured as charge_is_captured,
+    balance_transaction as balance_transaction_id,
+    card_brand,
+    card_funding,
+    card_country
 from {{ var('charges')}}
+left join charges_card
+    using(_airbyte_charges_hashid)

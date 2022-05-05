@@ -9,7 +9,7 @@ with invoice_line_items_period as (
 invoice_line_items_plan as (
     select
         _airbyte_invoice_line_items_hashid,
-        id as plan_id 
+        id as plan_id
     from {{ var('invoice_line_items_plan') }}
 )
 
@@ -24,5 +24,7 @@ select
     start as period_start,
     "end" as period_end
 from {{ var('invoice_line_items') }}
-left join invoice_line_items_period using(_airbyte_invoice_line_items_hashid)
-left join invoice_line_items_plan using(_airbyte_invoice_line_items_hashid)
+left join invoice_line_items_period
+    using(_airbyte_invoice_line_items_hashid)
+left join invoice_line_items_plan
+    using(_airbyte_invoice_line_items_hashid)

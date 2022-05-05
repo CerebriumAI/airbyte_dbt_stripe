@@ -94,7 +94,7 @@ line_items_summary as (
     left join plans
         on invoice_line_items.plan_id = plans.plan_id
     left join customers
-        using(customer_id)
+        on customers.customer_id = invoices.customer_id
 )
 
 select * from line_items_summary

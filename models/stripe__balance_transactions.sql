@@ -4,12 +4,6 @@ with balance_transactions as (
     from {{ ref('stg_stripe__balance_transactions') }}
 ),
 
-cards as (
-    select
-        * 
-    from {{ ref('stg_stripe__charges_card')}}
-),
-
 charges as (
     select
         * 
@@ -42,9 +36,9 @@ balance_transactions_summary as (
         -- Charges 
         charges.charge_id,
         charges.created_at as charge_created_at,
-        cards.card_brand,
-        cards.card_funding,
-        cards.card_country,
+        charges.card_brand,
+        charges.card_funding,
+        charges.card_country,
         case when balance_transactions.type = 'charges' then charges.charge_amount end as charge_amount, 
         case when balance_transactions.type = 'charges' then charges.charge_currency end as charge_currency,
        
@@ -59,8 +53,6 @@ balance_transactions_summary as (
     from balance_transactions
     left join charges 
         using(balance_transaction_id)
-    left join cards
-        using(charges_hashid)
     left join customers 
         using(customer_id)
     left join payouts 
