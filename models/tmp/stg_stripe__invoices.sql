@@ -1,6 +1,6 @@
 select
     id as invoice_id,
-    created as created_at,
+    {{ dbt_date.from_unixtimestamp('created') }} as created_at,
     number as invoice_number,
     description,
     paid,
@@ -10,7 +10,7 @@ select
     amount_due,
     amount_paid,
     amount_remaining,
-    due_date,
+    {{ dbt_date.from_unixtimestamp('due_date') }} as due_date,
     attempt_count,
     charge as charge_id,
     status,

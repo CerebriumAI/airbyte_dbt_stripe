@@ -12,7 +12,7 @@ select
     customer as customer_id,
     receipt_email,
     payment_intent as payment_intent_id,
-    created as created_at,
+    {{ dbt_date.from_unixtimestamp('created') }} as created_at,
     status as charge_status,
     amount as charge_amount,
     currency as charge_currency,

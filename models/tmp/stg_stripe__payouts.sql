@@ -1,6 +1,6 @@
 select
     id as payout_id,
-    arrival_date,
+    {{ dbt_date.from_unixtimestamp('arrival_date') }} as arrival_date,
     status,
     type,
     description,
