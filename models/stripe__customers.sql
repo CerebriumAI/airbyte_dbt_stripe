@@ -5,7 +5,7 @@ with balance_transactions as (
 ),
 
 incomplete_charges as (
-    select 
+    select
       created_at,
       customer_id,
       charge_amount
@@ -16,7 +16,7 @@ incomplete_charges as (
 customers as (
     select
         *
-    from {{ var('stg_stripe__customers') }}  
+    from {{ ref('stg_stripe__customers') }}  
 ),
 
 transactions_by_customer as (
@@ -32,7 +32,7 @@ transactions_by_customer as (
             end) as total_refunds,    
         sum(amount) as total_gross_transaction_amount,
         sum(fee) as total_fees,
-        sum(net) as total_net_transaction_amount,
+        sum(net_balance_change) as total_net_transaction_amount,
         sum(case when type in ('charge', 'payment') 
             then 1
             else 0 
@@ -41,40 +41,40 @@ transactions_by_customer as (
             then 1
             else 0 
             end) as total_refund_count,   
-        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
             end) as sales_this_month,
-        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
             end) as refunds_this_month,
-        sum(case when {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
             end) as gross_transaction_amount_this_month,
-        sum(case when {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then fee 
             else 0 
             end) as fees_this_month,
-        sum(case when {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then net_balance_change
             else 0 
             end) as net_transaction_amount_this_month,
-        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1 
             else 0 
             end) as sales_count_this_month,
-        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1 
             else 0 
             end) as refund_count_this_month,
         min(case when type in ('charge', 'payment') 
-            then {{ date_timezone('created_at') }}
+            then {{ dbt_utils.date_trunc("day", 'created_at') }}
             else null 
             end) as first_sale_date,
         max(case when type in ('charge', 'payment') 
-            then {{ date_timezone('created_at') }}
+            then {{ dbt_utils.date_trunc("day", 'created_at') }}
             else null 
             end) as most_recent_sale_date
     from balance_transactions
@@ -86,13 +86,13 @@ failed_charges_by_customer as (
     select
         customer_id,
         count(*) as total_failed_charge_count,
-        sum(amount) as total_failed_charge_amount,
-        sum(case when {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
+        sum(charge_amount) as total_failed_charge_amount,
+        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1
             else 0 
             end) as failed_charge_count_this_month,
-        sum(case when {{ dbt_utils.date_trunc('month', date_timezone('created_at')) }} = {{ dbt_utils.date_trunc('month', date_timezone(dbt_utils.current_timestamp())) }}
-            then amount
+        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            then charge_amount
             else 0 
             end) as failed_charge_amount_this_month
     from incomplete_charges
@@ -102,82 +102,82 @@ failed_charges_by_customer as (
 no_customer_transactions_overview as (
     select
         'No Associated Customer' as customer_description,
-        customer.email,
-        customer.created_at as customer_created_at,
-        customer.is_delinquent,
-        coalesce(transactions_grouped.total_sales/100.0, 0) as total_sales,
-        coalesce(transactions_grouped.total_refunds/100.0, 0) as total_refunds,
-        coalesce(transactions_grouped.total_gross_transaction_amount/100.0, 0) as total_gross_transaction_amount,
-        coalesce(transactions_grouped.total_fees/100.0, 0) as total_fees,
-        coalesce(transactions_grouped.total_net_transaction_amount/100.0, 0) as total_net_transaction_amount,
-        coalesce(transactions_grouped.total_sales_count, 0) as total_sales_count,
-        coalesce(transactions_grouped.total_refund_count, 0) as total_refund_count,    
-        coalesce(transactions_grouped.sales_this_month/100.0, 0) as sales_this_month,
-        coalesce(transactions_grouped.refunds_this_month/100.0, 0) as refunds_this_month,
-        coalesce(transactions_grouped.gross_transaction_amount_this_month/100.0, 0) as gross_transaction_amount_this_month,
-        coalesce(transactions_grouped.fees_this_month/100.0, 0) as fees_this_month,
-        coalesce(transactions_grouped.net_transaction_amount_this_month/100.0, 0) as net_transaction_amount_this_month,
-        coalesce(transactions_grouped.sales_count_this_month, 0) as sales_count_this_month,
-        coalesce(transactions_grouped.refund_count_this_month, 0) as refund_count_this_month,
-        transactions_grouped.first_sale_date,
-        transactions_grouped.most_recent_sale_date,
+        customers.customer_email,
+        customers.created_at as customer_created_at,
+        customers.is_delinquent,
+        coalesce(transactions_by_customer.total_sales/100.0, 0) as total_sales,
+        coalesce(transactions_by_customer.total_refunds/100.0, 0) as total_refunds,
+        coalesce(transactions_by_customer.total_gross_transaction_amount/100.0, 0) as total_gross_transaction_amount,
+        coalesce(transactions_by_customer.total_fees/100.0, 0) as total_fees,
+        coalesce(transactions_by_customer.total_net_transaction_amount/100.0, 0) as total_net_transaction_amount,
+        coalesce(transactions_by_customer.total_sales_count, 0) as total_sales_count,
+        coalesce(transactions_by_customer.total_refund_count, 0) as total_refund_count,    
+        coalesce(transactions_by_customer.sales_this_month/100.0, 0) as sales_this_month,
+        coalesce(transactions_by_customer.refunds_this_month/100.0, 0) as refunds_this_month,
+        coalesce(transactions_by_customer.gross_transaction_amount_this_month/100.0, 0) as gross_transaction_amount_this_month,
+        coalesce(transactions_by_customer.fees_this_month/100.0, 0) as fees_this_month,
+        coalesce(transactions_by_customer.net_transaction_amount_this_month/100.0, 0) as net_transaction_amount_this_month,
+        coalesce(transactions_by_customer.sales_count_this_month, 0) as sales_count_this_month,
+        coalesce(transactions_by_customer.refund_count_this_month, 0) as refund_count_this_month,
+        transactions_by_customer.first_sale_date,
+        transactions_by_customer.most_recent_sale_date,
         0 as total_failed_charge_count,
         0 as total_failed_charge_amount,
         0 as failed_charge_count_this_month,
         0 as failed_charge_amount_this_month,
-        customer.currency as customer_currency,
-        customer.default_card_id,
-        customer.shipping_name,
-        customer.shipping_address_line_1,
-        customer.shipping_address_line_2,
-        customer.shipping_address_city,
-        customer.shipping_address_state,
-        customer.shipping_address_country,
-        customer.shipping_address_postal_code,
-        customer.shipping_phone
+        customers.customer_currency,
+        customers.default_card_id,
+        customers.shipping_name,
+        customers.shipping_address_line_1,
+        customers.shipping_address_line_2,
+        customers.shipping_address_city,
+        customers.shipping_address_state,
+        customers.shipping_address_country,
+        customers.shipping_address_postal_code,
+        customers.phone
     from transactions_by_customer
     left join customers
         using(customer_id)
-    where customer.customer_id is null and customer.description is null
+    where customers.customer_id is null and customers.customer_description is null
 ),
 
 customer_transactions_overview as (
     select
-        coalesce(customer.description, customer.customer_id) as customer_description,
-        customer.email,
-        customer.created_at as customer_created_at,
-        customer.is_delinquent,
-        coalesce(transactions_grouped.total_sales/100.0, 0) as total_sales,
-        coalesce(transactions_grouped.total_refunds/100.0, 0) as total_refunds,
-        coalesce(transactions_grouped.total_gross_transaction_amount/100.0, 0) as total_gross_transaction_amount,
-        coalesce(transactions_grouped.total_fees/100.0, 0) as total_fees,
-        coalesce(transactions_grouped.total_net_transaction_amount/100.0, 0) as total_net_transaction_amount,
-        coalesce(transactions_grouped.total_sales_count, 0) as total_sales_count,
-        coalesce(transactions_grouped.total_refund_count, 0) as total_refund_count,    
-        coalesce(transactions_grouped.sales_this_month/100.0, 0) as sales_this_month,
-        coalesce(transactions_grouped.refunds_this_month/100.0, 0) as refunds_this_month,
-        coalesce(transactions_grouped.gross_transaction_amount_this_month/100.0, 0) as gross_transaction_amount_this_month,
-        coalesce(transactions_grouped.fees_this_month/100.0, 0) as fees_this_month,
-        coalesce(transactions_grouped.net_transaction_amount_this_month/100.0, 0) as net_transaction_amount_this_month,
-        coalesce(transactions_grouped.sales_count_this_month, 0) as sales_count_this_month,
-        coalesce(transactions_grouped.refund_count_this_month, 0) as refund_count_this_month,
-        transactions_grouped.first_sale_date,
-        transactions_grouped.most_recent_sale_date,
+        coalesce(customers.customer_description, customers.customer_id) as customer_description,
+        customers.customer_email,
+        customers.created_at as customer_created_at,
+        customers.is_delinquent,
+        coalesce(transactions_by_customer.total_sales/100.0, 0) as total_sales,
+        coalesce(transactions_by_customer.total_refunds/100.0, 0) as total_refunds,
+        coalesce(transactions_by_customer.total_gross_transaction_amount/100.0, 0) as total_gross_transaction_amount,
+        coalesce(transactions_by_customer.total_fees/100.0, 0) as total_fees,
+        coalesce(transactions_by_customer.total_net_transaction_amount/100.0, 0) as total_net_transaction_amount,
+        coalesce(transactions_by_customer.total_sales_count, 0) as total_sales_count,
+        coalesce(transactions_by_customer.total_refund_count, 0) as total_refund_count,    
+        coalesce(transactions_by_customer.sales_this_month/100.0, 0) as sales_this_month,
+        coalesce(transactions_by_customer.refunds_this_month/100.0, 0) as refunds_this_month,
+        coalesce(transactions_by_customer.gross_transaction_amount_this_month/100.0, 0) as gross_transaction_amount_this_month,
+        coalesce(transactions_by_customer.fees_this_month/100.0, 0) as fees_this_month,
+        coalesce(transactions_by_customer.net_transaction_amount_this_month/100.0, 0) as net_transaction_amount_this_month,
+        coalesce(transactions_by_customer.sales_count_this_month, 0) as sales_count_this_month,
+        coalesce(transactions_by_customer.refund_count_this_month, 0) as refund_count_this_month,
+        transactions_by_customer.first_sale_date,
+        transactions_by_customer.most_recent_sale_date,
         coalesce(failed_charges_by_customer.total_failed_charge_count, 0) as total_failed_charge_count,
         coalesce(failed_charges_by_customer.total_failed_charge_amount/100, 0) as total_failed_charge_amount,
         coalesce(failed_charges_by_customer.failed_charge_count_this_month, 0) as failed_charge_count_this_month,
         coalesce(failed_charges_by_customer.failed_charge_amount_this_month/100, 0) as failed_charge_amount_this_month,
-        customer.currency as customer_currency,
-        customer.default_card_id,
-        customer.shipping_name,
-        customer.shipping_address_line_1,
-        customer.shipping_address_line_2,
-        customer.shipping_address_city,
-        customer.shipping_address_state,
-        customer.shipping_address_country,
-        customer.shipping_address_postal_code,
-        customer.shipping_phone
-    from customer
+        customers.customer_currency,
+        customers.default_card_id,
+        customers.shipping_name,
+        customers.shipping_address_line_1,
+        customers.shipping_address_line_2,
+        customers.shipping_address_city,
+        customers.shipping_address_state,
+        customers.shipping_address_country,
+        customers.shipping_address_postal_code,
+        customers.phone
+    from customers
     left join transactions_by_customer
         using(customer_id)
     left join failed_charges_by_customer 

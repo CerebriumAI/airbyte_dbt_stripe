@@ -42,7 +42,8 @@ balance_transactions_summary as (
         case when balance_transactions.type = 'charges' then charges.charge_amount end as charge_amount, 
         case when balance_transactions.type = 'charges' then charges.charge_currency end as charge_currency,
        
-       -- Customer details 
+       -- Customer details
+        charges.customer_id,
         customers.customer_description,
         payouts.payout_id,
         payouts.arrival_date as payout_arrival_date,

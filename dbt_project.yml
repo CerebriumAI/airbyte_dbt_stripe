@@ -24,6 +24,7 @@ models:
 vars:
   airbyte_stripe:
     customers: "{{ source('airbyte_stripe','customers') }}"
+    customers_address: "{{ source('airbyte_stripe','customers_address') }}"
     balance_transactions: "{{ source('airbyte_stripe','balance_transactions') }}" 
     charges_card: "{{ source('airbyte_stripe','charges_card') }}"
     charges: "{{ source('airbyte_stripe','charges') }}"
