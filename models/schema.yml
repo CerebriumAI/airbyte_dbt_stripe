@@ -185,7 +185,7 @@ models:
         description: "The end date of the subscription purchase"
       - name: plan_id
         description: "The plan associated with the purchased subscription"
-      - name: plan_is_active
+      - name: is_plan_active
         description: "A flag for whether the subscription plan is active"
       - name: plan_amount
         description: "The total amount for the subscription plan"

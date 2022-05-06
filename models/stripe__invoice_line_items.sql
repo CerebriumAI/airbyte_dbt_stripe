@@ -78,7 +78,7 @@ line_items_summary as (
         subscriptions.start_date as subscription_start_date,
         subscriptions.ended_at as subscription_ended_at,
         plans.plan_id,
-        plans.plan_is_active,
+        plans.is_plan_active,
         plans.plan_amount,
         plans.plan_interval,
         plans.plan_interval_count,

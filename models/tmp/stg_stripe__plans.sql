@@ -1,6 +1,6 @@
 select
     id as plan_id,
-    active as plan_is_active,
+    active as is_plan_active,
     amount as plan_amount,
     interval as plan_interval,
     interval_count as plan_interval_count,
