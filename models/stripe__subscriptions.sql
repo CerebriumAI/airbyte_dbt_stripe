@@ -77,6 +77,8 @@ subscription_stats as (
         subscriptions.created_at,
         subscriptions.current_period_start,
         subscriptions.current_period_end,
+        subscriptions.trial_start,
+        subscriptions.trial_end,
         subscriptions.days_until_due,
         subscriptions.is_cancel_at_period_end,
         number_invoices_generated,

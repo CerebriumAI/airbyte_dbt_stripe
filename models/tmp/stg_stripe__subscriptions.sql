@@ -10,6 +10,8 @@ select
     {{ dbt_date.from_unixtimestamp('created') }} as created_at,
     {{ dbt_date.from_unixtimestamp('current_period_start') }} as current_period_start,
     {{ dbt_date.from_unixtimestamp('current_period_end') }} as current_period_end,
+    {{ dbt_date.from_unixtimestamp('trial_start') }} as trial_start,
+    {{ dbt_date.from_unixtimestamp('trial_end') }} as trial_end,
     days_until_due,
     cancel_at_period_end as is_cancel_at_period_end
 from {{ var('subscriptions') }}
