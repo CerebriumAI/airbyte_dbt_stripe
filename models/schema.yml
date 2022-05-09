@@ -124,7 +124,6 @@ models:
         description: "The postal code of the customer shipping address"
       - name: phone_number
         description: "The phone number of the customer"
-      
   - name: stripe__balance_transactions
     description: "A table storing all balance transactions and associated charge data"
     columns:
@@ -193,7 +192,6 @@ models:
         description: "The user specified source of the payout" 
       - name: refund_reason
         description: "The refund reason (if applicable)"
-  
   - name: stripe__invoice_line_items
     description: "A table storing all line items associated with an invoice"
     columns:
@@ -295,12 +293,11 @@ models:
         description: "The nickname of the subscription plan"
       - name: plan_product_id
         description: "The unique id of the product associated with subscription plan"
-  
-    - name: stripe__subscriptions
+  - name: stripe__subscriptions
     description: "A table storing the details of all subscription plans used by customers"
     columns:
       - name: subscription_id
-      description: "The unique identifier for the subscription"
+        description: "The unique identifier for the subscription"
         tests:
           - unique
           - not_null
@@ -365,15 +362,15 @@ models:
       - name: total_amount_billed
         description: "The total amount billed for the subscription"
         tests:
-          not_null
+          - not_null
       - name: total_amount_paid
         description: "The total amount paid for the subscription"
         tests:
-          not_null
+          - not_null
       - name: total_amount_remaining
         description: "The total amount remaining for the subscription"
         tests:
-          not_null
+          - not_null
       - name: most_recent_invoice_at
         description: "The datetime the most recent invoice was generated"
       - name: average_invoice_amount
@@ -388,86 +385,86 @@ models:
         description: "The average amount of line items charged for a subscription"
         tests:
           - not_null
-    - name: "stripe__daily_overview"
-      description: "A table storing the daily overview statistics of your stripe account"
-      columns:
-        - name: date
-          description: "The date for the Stripe record"
-          tests:
-            - unique
-            - not_null
-        - name: total_sales
-          description: "The total amount of sales done on the date"
-          tests:
-            - not_null
-        - name: total_refunds
-          description: "The total amount of refunds done on the date"
-          tests:
-            - not_null
-        - name: total_adjustments
-          description: "The total amount of adjustments done on the date"
-          tests:
-            - not_null
-        - name: total_other_transactions
-          description: "The total amount of other transactions done on the date"
-          tests:
-            - not_null
-        - name: total_gross_transaction_amount
-          description: "The total amount of gross_transaction_amount done on the date"
-          tests:
-            - not_null
-        - name: total_payout_fees
-          description: "The total amount of payout_fees done on the date"
-          tests:
-            - not_null
-        - name: total_gross_payment_amount
-          description: "The total amount of gross_payment_amount done on the date"
-          tests:
-            - not_null
-        - name: total_failed_charge_amount
-          description: "The total amount of failed charges on the date"
-          tests:
-            - not_null
-        - name: total_sales_count
-          description: "The total number of sales done on the date"
-          tests:
-            - not_null
-        - name: total_payouts_count
-          description: "The total number of payouts done on the date"
-          tests:
-            - not_null
-        - name: total_adjustments_count
-          description: "The total number of adjustments done on the date"
-          tests:
-            - not_null
-        - name: total_failed_charge_count
-          description: "The total number of failed charges on the date"
-          tests:
-            - not_null
-        - name: daily_end_balance
-          description: "The daily end balance on the date"
-          tests:
-            - not_null
-        - name: churned_subscriptions
-          description: "The number of subscriptions that have been churned on the date"
-        - name: new_subscriptions
-          description: "The number of new subscriptions on the date"
-        - name: active_subscriptions
-          description: "The snapshot of the total number of subscriptions that were active at the date"
-        - name: churned_mrr
-          description: "The amount of monthly recurring revenue churned on that date"
-        - name: new_mrr
-          description: "The amount of new monthly recurring revenue gained on the date"
-        - name: mrr
-          description: "The snapshot of the total monthly recurring revenue on the date"
-        - name: mrr_per_subscription
-          description: "The monthly recurring revenue per active subscription"
-        - name: mrr_per_customer
-          description: "The monthly recurring revenue per active customer"
-        - name: customers_diff
-          description: "The change in number of customers from the previous date to the current date"
-        - name: subscriptions_diff
-          description: "The change in number of subscriptions from the previous date to the current date"
-        - name: mrr_diff
-          description: "The change in the number of customers from the previous date to the current date"
-        
+  - name: "stripe__daily_overview"
+    description: "A table storing the daily overview statistics of your stripe account"
+    columns:
+      - name: date
+        description: "The date for the Stripe record"
+        tests:
+          - unique
+          - not_null
+      - name: total_sales
+        description: "The total amount of sales done on the date"
+        tests:
+          - not_null
+      - name: total_refunds
+        description: "The total amount of refunds done on the date"
+        tests:
+          - not_null
+      - name: total_adjustments
+        description: "The total amount of adjustments done on the date"
+        tests:
+          - not_null
+      - name: total_other_transactions
+        description: "The total amount of other transactions done on the date"
+        tests:
+          - not_null
+      - name: total_gross_transaction_amount
+        description: "The total amount of gross_transaction_amount done on the date"
+        tests:
+          - not_null
+      - name: total_payout_fees
+        description: "The total amount of payout_fees done on the date"
+        tests:
+          - not_null
+      - name: total_gross_payment_amount
+        description: "The total amount of gross_payment_amount done on the date"
+        tests:
+          - not_null
+      - name: total_failed_charge_amount
+        description: "The total amount of failed charges on the date"
+        tests:
+          - not_null
+      - name: total_sales_count
+        description: "The total number of sales done on the date"
+        tests:
+          - not_null
+      - name: total_payouts_count
+        description: "The total number of payouts done on the date"
+        tests:
+          - not_null
+      - name: total_adjustments_count
+        description: "The total number of adjustments done on the date"
+        tests:
+          - not_null
+      - name: total_failed_charge_count
+        description: "The total number of failed charges on the date"
+        tests:
+          - not_null
+      - name: daily_end_balance
+        description: "The daily end balance on the date"
+        tests:
+          - not_null
+      - name: churned_subscriptions
+        description: "The number of subscriptions that have been churned on the date"
+      - name: new_subscriptions
+        description: "The number of new subscriptions on the date"
+      - name: active_subscriptions
+        description: "The snapshot of the total number of subscriptions that were active at the date"
+      - name: churned_mrr
+        description: "The amount of monthly recurring revenue churned on that date"
+      - name: new_mrr
+        description: "The amount of new monthly recurring revenue gained on the date"
+      - name: mrr
+        description: "The snapshot of the total monthly recurring revenue on the date"
+      - name: mrr_per_subscription
+        description: "The monthly recurring revenue per active subscription"
+      - name: mrr_per_customer
+        description: "The monthly recurring revenue per active customer"
+      - name: customers_diff
+        description: "The change in number of customers from the previous date to the current date"
+      - name: subscriptions_diff
+        description: "The change in number of subscriptions from the previous date to the current date"
+      - name: mrr_diff
+        description: "The change in the number of customers from the previous date to the current date"
+      

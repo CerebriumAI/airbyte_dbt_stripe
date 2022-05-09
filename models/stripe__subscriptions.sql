@@ -57,7 +57,7 @@ invoice_stats_by_sub as (
         max(created_at) as most_recent_invoice_created_at,
         avg(amount_due) as average_invoice_amount,
         avg(total_item_amount) as average_line_item_amount,
-        avg(number_line_items) as avg_num_invoice_items
+        avg(number_line_items) as average_num_invoice_items
     from line_items_by_invoice
   {{ dbt_utils.group_by(1) }}
 ),

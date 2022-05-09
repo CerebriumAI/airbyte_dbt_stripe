@@ -101,6 +101,7 @@ failed_charges_by_customer as (
 
 no_customer_transactions_overview as (
     select
+        customer_id,
         'No Associated Customer' as customer_description,
         customers.customer_email,
         customers.created_at as customer_created_at,
@@ -134,7 +135,7 @@ no_customer_transactions_overview as (
         customers.shipping_address_state,
         customers.shipping_address_country,
         customers.shipping_address_postal_code,
-        customers.phone
+        customers.phone as phone_number
     from transactions_by_customer
     left join customers
         using(customer_id)
