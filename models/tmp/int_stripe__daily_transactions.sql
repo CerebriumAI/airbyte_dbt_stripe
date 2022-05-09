@@ -72,21 +72,21 @@ daily_failed_charges as (
 daily_transactions as (
     select
         daily_balance_transactions.date,
-        daily_balance_transactions.total_sales/100.0 as total_sales,
-        daily_balance_transactions.total_refunds/100.0 as total_refunds,
-        daily_balance_transactions.total_adjustments/100.0 as total_adjustments,
-        daily_balance_transactions.total_other_transactions/100.0 as total_other_transactions,
-        daily_balance_transactions.total_gross_transaction_amount/100.0 as total_gross_transaction_amount,
-        daily_balance_transactions.total_net_transactions/100.0 as total_net_transactions,
-        daily_balance_transactions.total_payout_fees/100.0 as total_payout_fees,
-        daily_balance_transactions.total_gross_payout_amount/100.0 as total_gross_payout_amount,
-        daily_balance_transactions.daily_net_activity/100.0 as daily_net_activity,
-        (daily_balance_transactions.daily_net_activity + daily_balance_transactions.total_gross_payout_amount)/100.0 as daily_end_balance,
+        round(daily_balance_transactions.total_sales/100.0, 2) as total_sales,
+        round(daily_balance_transactions.total_refunds/100.0, 2) as total_refunds,
+        round(daily_balance_transactions.total_adjustments/100.0, 2) as total_adjustments,
+        round(daily_balance_transactions.total_other_transactions/100.0, 2) as total_other_transactions,
+        round(daily_balance_transactions.total_gross_transaction_amount/100.0, 2) as total_gross_transaction_amount,
+        round(daily_balance_transactions.total_net_transactions/100.0, 2) as total_net_transactions,
+        round(daily_balance_transactions.total_payout_fees/100.0, 2) as total_payout_fees,
+        round(daily_balance_transactions.total_gross_payout_amount/100.0, 2) as total_gross_payout_amount,
+        round(daily_balance_transactions.daily_net_activity/100.0, 2) as daily_net_activity,
+        round((daily_balance_transactions.daily_net_activity + daily_balance_transactions.total_gross_payout_amount)/100.0, 2) as daily_end_balance,
         daily_balance_transactions.total_sales_count,
         daily_balance_transactions.total_payouts_count,
         daily_balance_transactions.total_adjustments_count,
         coalesce(daily_failed_charges.total_failed_charge_count, 0) as total_failed_charge_count,
-        coalesce(daily_failed_charges.total_failed_charge_amount/100, 0) as total_failed_charge_amount
+        round(coalesce(daily_failed_charges.total_failed_charge_amount/100, 0.0), 2) as total_failed_charge_amount
     from daily_balance_transactions
     left join daily_failed_charges 
         using(date)
