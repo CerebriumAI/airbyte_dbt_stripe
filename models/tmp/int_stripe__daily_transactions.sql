@@ -1,3 +1,22 @@
+{%- set date_range_query -%}
+    select 
+        cast({{ dbt_utils.date_trunc("day",'created_at') }} as date) as min_date,
+        cast({{ dbt_utils.date_trunc("day", dbt_date.today()) }} as date) as max_date
+    from
+        {{ ref('stripe__balance_transactions') }}
+    order by
+        created_at asc
+    limit 1
+{%- endset -%}
+{% set date_range = run_query(date_range_query) %}
+-- The dbt parser will cause dbt run to fail as these variables are set dynamically.
+-- We avoid this by only calling set "in execution"
+{% if execute %}
+    {% set min_date = date_range.columns[0][0] %}
+    {% set max_date = date_range.columns[1][0] %}
+{% endif %}
+
+
 with balance_transactions as (
     select
         *
@@ -69,28 +88,14 @@ daily_failed_charges as (
     {{ dbt_utils.group_by(1) }}
 ),
 
-date_range as (
-    select 
-        cast({{ dbt_utils.date_trunc("day",'date') }} as date) as min_date,
-        cast({{ dbt_utils.date_trunc("day", dbt_date.today()) }} as date) as max_date
-    from
-        daily_balance_transactions
-    order by
-        date asc
-    limit 1
-),
-
 
 date_spine as (
-    select
-        {{ dbt_utils.date_spine(datepart="day", start_date="min_date", end_date="max_date") }}
-    from
-        date_range
+    {{ dbt_date.get_base_dates(start_date=min_date, end_date=max_date) }}
 ),
 
 daily_transactions as (
     select
-        date_series.date,
+        date_spine.date_day as date,
         round(coalesce(daily_balance_transactions.total_sales/100.0, 0), 2) as total_sales,
         round(coalesce(daily_balance_transactions.total_refunds/100.0, 0), 2) as total_refunds,
         round(coalesce(daily_balance_transactions.total_adjustments/100.0, 0), 2) as total_adjustments,
@@ -110,7 +115,7 @@ daily_transactions as (
     left join daily_failed_charges 
         using(date)
     right join date_spine
-        using(date)
+        on daily_balance_transactions.date = date_spine.date_day
 )
 
 select * from daily_transactions
