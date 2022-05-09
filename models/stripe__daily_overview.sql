@@ -1,20 +1,20 @@
 with daily_transactions as (
     select
         *
-    from ref('int_stripe__daily_transactions')
+    from {{ ref('int_stripe__daily_transactions') }}
 ),
 
 subscription_payments as (
     select
         *
-    from ref('int_stripe__subscription_payments')
+    from {{ ref('int_stripe__subscription_payments') }}
 ),
 
 customer_stats as (
     select
         *
-    from ref('int_stripe__daily_customer_stats.sql')
-)
+    from {{ ref('int_stripe__daily_customer_stats') }}
+),
 
 sub_stats as (
     select
@@ -34,7 +34,7 @@ sub_stats as (
                         1
                     end) as "churned_subscriptions"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     status,
@@ -43,7 +43,7 @@ sub_stats as (
                 from
                     subscription_payments
                 where
-                    sp.date <= date_trunc('day', dt.date)
+                    subscription_payments.date <= date_trunc('day', dt.date)
                 order by
                     subscription_id,
                     date desc
@@ -67,7 +67,7 @@ sub_stats as (
                         1
                     end) as "new_subscriptions"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     invoice_number,
@@ -77,18 +77,17 @@ sub_stats as (
                 from
                     subscription_payments
                 where
-                    sp.date = date_trunc('day', dt.date)
+                    subscription_payments.date = date_trunc('day', dt.date)
                 order by
                     subscription_id,
-                    sp.date desc
+                    subscription_payments.date desc
             ) as filtered_subs
         ),
         (
             /*
             Active subscriptions are counted when the status is active or past due.
             If the subscription is canceled, the sub will be counted only if the current
-            day is less than the day the sub was canceled. This does not apply to subs
-            that are 'set to cancel' the day they are canceled.
+            day is less than the day the sub was canceled.
             */
             select
                 count(
@@ -98,7 +97,6 @@ sub_stats as (
                             or filtered_subs.status = 'past due'
                             or (
                                 filtered_subs.status = 'canceled'
-                                and (cancel_at is null or date_trunc('day', filtered_subs.canceled_at) < date_trunc('day', filtered_subs.cancel_at))
                                 and dt.date < date_trunc('day', filtered_subs.canceled_at)
                             )
                         )
@@ -107,20 +105,19 @@ sub_stats as (
                         1
                     end) as "active_subscriptions"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     status,
                     customer_email,
-                    canceled_at,
-                    cancel_at
+                    canceled_at
                 from
                     subscription_payments
                 where
-                    sp.date <= date_trunc('day', dt.date)
+                    subscription_payments.date <= date_trunc('day', dt.date)
                 order by
                     subscription_id,
-                    sp.date desc) as filtered_subs
+                    subscription_payments.date desc) as filtered_subs
         ),
         /*
         There are multiple different values that can be used when summing mrr. Stripe
@@ -137,7 +134,7 @@ sub_stats as (
                         filtered_subs.average_revenue / 100
                     end), 2), 0) as "churned_mrr"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     average_revenue,
@@ -147,10 +144,10 @@ sub_stats as (
                 from
                     subscription_payments
                 where
-                    sp.date <= date_trunc('day', dt.date)
+                    subscription_payments.date <= date_trunc('day', dt.date)
                 order by
                     subscription_id,
-                    sp.date desc
+                    subscription_payments.date desc
             ) as filtered_subs
         ),
         (
@@ -168,7 +165,7 @@ sub_stats as (
                         filtered_subs.average_revenue / 100
                     end), 2), 0) as "new_mrr"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     invoice_number,
@@ -178,7 +175,7 @@ sub_stats as (
                 from
                     subscription_payments
                 where
-                    sp.date = date_trunc('day', dt.date)
+                    subscription_payments.date = date_trunc('day', dt.date)
                 order by
                     subscription_id,
                     date desc
@@ -193,7 +190,6 @@ sub_stats as (
                             or filtered_subs.status = 'past due'
                             or (
                                 filtered_subs.status = 'canceled'
-                                and (cancel_at is null or date_trunc('day', filtered_subs.canceled_at) < date_trunc('day', filtered_subs.cancel_at))
                                 and dt.date < date_trunc('day', filtered_subs.canceled_at)
                             )
                         )
@@ -202,18 +198,17 @@ sub_stats as (
                         filtered_subs.average_revenue / 100
                     end), 2), 0) as "mrr"
             from (
-                select distinct on (sp.subscription_id)
+                select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     average_revenue,
                     status,
                     customer_email,
-                    canceled_at,
-                    cancel_at
+                    canceled_at
                 from
                     subscription_payments
                 where
-                    sp.date <= date_trunc('day', dt.date)
+                    subscription_payments.date <= date_trunc('day', dt.date)
                 order by
                     subscription_id,
                     date desc
