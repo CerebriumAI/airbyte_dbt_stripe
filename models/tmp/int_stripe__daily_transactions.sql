@@ -89,7 +89,7 @@ date_series AS (
 
 daily_transactions as (
     select
-        daily_balance_transactions.date,
+        date_series.date,
         round(coalesce(daily_balance_transactions.total_sales/100.0, 0), 2) as total_sales,
         round(coalesce(daily_balance_transactions.total_refunds/100.0, 0), 2) as total_refunds,
         round(coalesce(daily_balance_transactions.total_adjustments/100.0, 0), 2) as total_adjustments,
