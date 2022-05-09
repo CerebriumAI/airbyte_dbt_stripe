@@ -69,10 +69,10 @@ daily_failed_charges as (
     {{ dbt_utils.group_by(1) }}
 ),
 
-date_ranges as (
+date_range as (
     select 
-        {{ dbt_utils.date_trunc("day",'date') }} as min_date,
-        {{ dbt_utils.date_trunc("day", dbt_date.today()) }} as max_date
+        cast({{ dbt_utils.date_trunc("day",'date') }} as date) as min_date,
+        cast({{ dbt_utils.date_trunc("day", dbt_date.today()) }} as date) as max_date
     from
         daily_balance_transactions
     order by
@@ -80,11 +80,12 @@ date_ranges as (
     limit 1
 ),
 
-date_series AS (
-    SELECT
-        generate_series(min_date, max_date, '1 day'::interval) AS date
-    FROM
-        date_ranges
+
+date_spine as (
+    select
+        {{ dbt_utils.date_spine(datepart="day", start_date="min_date", end_date="max_date") }}
+    from
+        date_range
 ),
 
 daily_transactions as (
@@ -108,7 +109,7 @@ daily_transactions as (
     from daily_balance_transactions
     left join daily_failed_charges 
         using(date)
-    right join date_series
+    right join date_spine
         using(date)
 )
 

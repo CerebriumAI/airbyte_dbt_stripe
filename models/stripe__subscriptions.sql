@@ -88,7 +88,7 @@ subscription_stats as (
         most_recent_invoice_created_at,
         average_invoice_amount,
         average_line_item_amount,
-        avg_num_invoice_items
+        average_num_invoice_items
     from subscriptions
     left join invoice_stats_by_sub
         using(subscription_id)

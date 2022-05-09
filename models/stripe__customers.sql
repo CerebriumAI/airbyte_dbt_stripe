@@ -143,6 +143,7 @@ no_customer_transactions_overview as (
 
 customer_transactions_overview as (
     select
+        customer_id,
         coalesce(customers.customer_description, customers.customer_id) as customer_description,
         customers.customer_email,
         customers.created_at as customer_created_at,
@@ -176,7 +177,7 @@ customer_transactions_overview as (
         customers.shipping_address_state,
         customers.shipping_address_country,
         customers.shipping_address_postal_code,
-        customers.phone
+        customers.phone as phone_number
     from customers
     left join transactions_by_customer
         using(customer_id)
