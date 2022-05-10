@@ -22,61 +22,104 @@ customers as (
 transactions_by_customer as (
     select
         customer_id,
-        sum(case when type in ('charge', 'payment') 
+        sum(
+            case when 
+                type in ('charge', 'payment') 
             then amount
             else 0 
-            end) as total_sales,
-        sum(case when type in ('payment_refund', 'refund') 
+            end
+        ) as total_sales,
+        sum(
+            case when 
+                type in ('payment_refund', 'refund') 
             then amount
             else 0 
-            end) as total_refunds,    
+            end
+        ) as total_refunds,    
         sum(amount) as total_gross_transaction_amount,
         sum(fee) as total_fees,
         sum(net_balance_change) as total_net_transaction_amount,
-        sum(case when type in ('charge', 'payment') 
+        sum(
+            case when 
+                type in ('charge', 'payment') 
             then 1
             else 0 
-            end) as total_sales_count, 
-        sum(case when type in ('payment_refund', 'refund') 
+            end
+        ) as total_sales_count, 
+        sum(
+            case when 
+                type in ('payment_refund', 'refund') 
             then 1
             else 0 
-            end) as total_refund_count,   
-        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as total_refund_count,   
+        sum(
+            case when 
+                type in ('charge', 'payment')
+                and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
-            end) as sales_this_month,
-        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as sales_this_month,
+        sum(
+            case when 
+                type in ('payment_refund', 'refund')
+                and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
-            end) as refunds_this_month,
-        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as refunds_this_month,
+        sum(
+            case when 
+                {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then amount 
             else 0 
-            end) as gross_transaction_amount_this_month,
-        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as gross_transaction_amount_this_month,
+        sum(
+            case when 
+                {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then fee 
             else 0 
-            end) as fees_this_month,
-        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as fees_this_month,
+        sum(
+            case when 
+                {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then net_balance_change
             else 0 
-            end) as net_transaction_amount_this_month,
-        sum(case when type in ('charge', 'payment') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as net_transaction_amount_this_month,
+        sum(
+            case when 
+                type in ('charge', 'payment')
+                and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1 
             else 0 
-            end) as sales_count_this_month,
-        sum(case when type in ('payment_refund', 'refund') and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as sales_count_this_month,
+        sum(
+            case when 
+                type in ('payment_refund', 'refund')
+                and {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1 
             else 0 
-            end) as refund_count_this_month,
-        min(case when type in ('charge', 'payment') 
+            end
+        ) as refund_count_this_month,
+        min(
+            case when 
+                type in ('charge', 'payment') 
             then {{ dbt_utils.date_trunc("day", 'created_at') }}
             else null 
-            end) as first_sale_date,
-        max(case when type in ('charge', 'payment') 
+            end
+        ) as first_sale_date,
+        max(
+            case when
+                type in ('charge', 'payment') 
             then {{ dbt_utils.date_trunc("day", 'created_at') }}
             else null 
-            end) as most_recent_sale_date
+            end
+        ) as most_recent_sale_date
     from balance_transactions
     where type in ('payment', 'charge', 'payment_refund', 'refund')
     {{ dbt_utils.group_by(1) }}
@@ -87,14 +130,20 @@ failed_charges_by_customer as (
         customer_id,
         count(*) as total_failed_charge_count,
         sum(charge_amount) as total_failed_charge_amount,
-        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+        sum(
+            case when 
+                {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then 1
             else 0 
-            end) as failed_charge_count_this_month,
-        sum(case when {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
+            end
+        ) as failed_charge_count_this_month,
+        sum(
+            case when
+                {{ dbt_utils.date_trunc("month", 'created_at') }} = {{ dbt_utils.date_trunc('month', dbt_date.today()) }}
             then charge_amount
             else 0 
-            end) as failed_charge_amount_this_month
+            end
+        ) as failed_charge_amount_this_month
     from incomplete_charges
     {{ dbt_utils.group_by(1) }}
 ),

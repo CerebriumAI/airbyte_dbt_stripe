@@ -3,9 +3,10 @@ with customers as (
         {{ dbt_utils.date_trunc("day", 'first_sale_date') }} as date,
         count(*) as new_customers,
         count(
-            case when (is_delinquent = false and total_sales > 0) then 
-                1
-            end) as active_new_customers
+            case when
+                is_delinquent = false and total_sales > 0
+            then 1 end
+        ) as active_new_customers
     from
         {{ ref('stripe__customers') }}
     where
@@ -18,14 +19,16 @@ trials as (
     select
         {{ dbt_utils.date_trunc("day", 'created_at') }} as date,
         count(
-            case when (trial_start is not null) then
-                1
-            end) as trials,
+            case when 
+                trial_start is not null
+            then 1 end
+        ) as trials,
         count(
-            case when (trial_start is not null
-                and total_amount_billed > 0) then
-                1
-            end) as trials_converted_on_day
+            case when
+                trial_start is not null
+                and total_amount_billed > 0
+            then 1 end
+        ) as trials_converted_on_day
     from
         {{ ref('stripe__subscriptions') }}
     group by
@@ -37,10 +40,11 @@ trial_conversions as (
     select
         {{ dbt_utils.date_trunc("day", 'trial_end') }} as date,
         count(
-            case when (trial_end is not null
-                and total_amount_billed > 0) then
-                1
-            end) as trials_converted
+            case when 
+                (trial_end is not null
+                and total_amount_billed > 0) 
+            then 1 end
+        ) as trials_converted
     from
         {{ ref('stripe__subscriptions') }}
     group by

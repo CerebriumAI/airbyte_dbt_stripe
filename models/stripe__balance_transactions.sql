@@ -39,8 +39,14 @@ balance_transactions_summary as (
         charges.card_brand,
         charges.card_funding,
         charges.card_country,
-        case when balance_transactions.type = 'charges' then charges.charge_amount end as charge_amount, 
-        case when balance_transactions.type = 'charges' then charges.charge_currency end as charge_currency,
+        case when 
+            balance_transactions.type = 'charges' 
+            then charges.charge_amount end 
+        as charge_amount, 
+        case when 
+            balance_transactions.type = 'charges' 
+            then charges.charge_currency end 
+        as charge_currency,
        
        -- Customer details
         charges.customer_id,

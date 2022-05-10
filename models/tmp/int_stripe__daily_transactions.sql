@@ -39,42 +39,71 @@ daily_balance_transactions as (
             then {{ dbt_utils.date_trunc("day", 'available_on') }}  
             else {{ dbt_utils.date_trunc("day", 'created_at') }} 
         end as date,
-        sum(case when type in ('charge', 'payment') 
+        sum(
+            case when 
+                type in ('charge', 'payment') 
             then amount 
-            else 0 end) as total_sales,
-        sum(case when type in ('payment_refund', 'refund') 
+            else 0 end
+        ) as total_sales,
+        sum(case when 
+                type in ('payment_refund', 'refund') 
             then amount 
-            else 0 end) as total_refunds,
-        sum(case when type = 'adjustment' 
+            else 0 end
+        ) as total_refunds,
+        sum(case when 
+                type = 'adjustment' 
             then amount 
-            else 0 end) as total_adjustments,
-        sum(case when type not in ('charge', 'payment', 'payment_refund', 'refund', 'adjustment', 'payout') and type not like '%transfer%' 
+            else 0 end
+        ) as total_adjustments,
+        sum(case when 
+                type not in ('charge', 'payment', 'payment_refund', 'refund', 'adjustment', 'payout')
+                and type not like '%transfer%' 
             then amount 
-            else 0 end) as total_other_transactions,
-        sum(case when type <> 'payout' and type not like '%transfer%' 
+            else 0 end
+        ) as total_other_transactions,
+        sum(case when 
+                type <> 'payout'
+                and type not like '%transfer%' 
             then amount 
-            else 0 end) as total_gross_transaction_amount,
-        sum(case when type <> 'payout' and type not like '%transfer%' 
+            else 0 end
+        ) as total_gross_transaction_amount,
+        sum(case when
+                type <> 'payout'
+                and type not like '%transfer%' 
             then net_balance_change
-            else 0 end) as total_net_transactions,
-        sum(case when type = 'payout' or type like '%transfer%' 
+            else 0 end
+        ) as total_net_transactions,
+        sum(case when
+                type = 'payout'
+                or type like '%transfer%' 
             then fee * -1.0
-            else 0 end) as total_payout_fees,
-        sum(case when type = 'payout' or type like '%transfer%' 
+            else 0 end
+        ) as total_payout_fees,
+        sum(case when
+                type = 'payout' or type like '%transfer%' 
             then amount 
-            else 0 end) as total_gross_payout_amount,
-        sum(case when type = 'payout' or type like '%transfer%' 
+            else 0 end
+        ) as total_gross_payout_amount,
+        sum(case when
+                type = 'payout' or type like '%transfer%' 
             then fee * -1.0 
-            else net_balance_change end) as daily_net_activity,
-        sum(case when type in ('payment', 'charge') 
+            else net_balance_change end
+        ) as daily_net_activity,
+        sum(case when 
+                type in ('payment', 'charge') 
             then 1 
-            else 0 end) as total_sales_count,
-        sum(case when type = 'payout' 
+            else 0 end
+        ) as total_sales_count,
+        sum(case when 
+                type = 'payout' 
             then 1 
-            else 0 end) as total_payouts_count,
-        count(distinct case when type = 'adjustment' 
+            else 0 end
+        ) as total_payouts_count,
+        count(distinct case when 
+                type = 'adjustment' 
             then coalesce(source, payout_id) 
-            else null end) as total_adjustments_count
+            else null end
+        ) as total_adjustments_count
     from balance_transactions
     {{ dbt_utils.group_by(1) }}
 ), 

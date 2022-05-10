@@ -27,12 +27,12 @@ sub_stats as (
             select
                 count(
                     case when (
-                        filtered_subs.status = 'canceled'
+                        filtered_subs.status = 'canceled' and
                         and dt.date = date_trunc('day', filtered_subs.canceled_at)
                         and filtered_subs.customer_email is not null
-                    ) then
-                        1
-                    end) as "churned_subscriptions"
+                    ) 
+                    then 1 end
+                ) as "churned_subscriptions"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
@@ -63,9 +63,9 @@ sub_stats as (
                         )
                         and filtered_subs.invoice_number = 1
                         and filtered_subs.customer_email is not null
-                    ) then
-                        1
-                    end) as "new_subscriptions"
+                    )
+                    then 1 end
+                ) as "new_subscriptions"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
@@ -101,9 +101,9 @@ sub_stats as (
                             )
                         )
                         and filtered_subs.customer_email is not null
-                    ) then
-                        1
-                    end) as "active_subscriptions"
+                    ) 
+                    then 1 end
+                ) as "active_subscriptions"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
@@ -130,9 +130,9 @@ sub_stats as (
                         filtered_subs.status = 'canceled'
                         and dt.date = date_trunc('day', filtered_subs.canceled_at)
                         and filtered_subs.customer_email is not null
-                    ) then
-                        filtered_subs.average_revenue / 100
-                    end), 2), 0) as "churned_mrr"
+                    ) 
+                    then filtered_subs.average_revenue / 100 end
+                ), 2), 0) as "churned_mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
@@ -161,9 +161,9 @@ sub_stats as (
                         )
                         and filtered_subs.invoice_number = 1
                         and filtered_subs.customer_email is not null
-                    ) then
-                        filtered_subs.average_revenue / 100
-                    end), 2), 0) as "new_mrr"
+                    ) 
+                    then filtered_subs.average_revenue / 100 end
+                ), 2), 0) as "new_mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
@@ -194,9 +194,9 @@ sub_stats as (
                             )
                         )
                         and filtered_subs.customer_email is not null
-                    ) then
-                        filtered_subs.average_revenue / 100
-                    end), 2), 0) as "mrr"
+                    ) 
+                    then filtered_subs.average_revenue / 100 end
+                ), 2), 0) as "mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
