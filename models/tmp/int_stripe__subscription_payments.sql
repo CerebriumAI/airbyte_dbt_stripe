@@ -6,9 +6,9 @@ with subscription_items as (
         -- This is useful when counting sources of new MRR
         count(subscription_id) over (partition by subscription_id order by invoice_created_at asc) as invoice_number
     from
-        {{ ref('stripe__invoice_line_items') }} invoice_items
+        {{ ref('stripe__invoice_line_items') }}
     where
-        subscription_id IS NOT NULL
+        subscription_id is not null
     group by
         invoice_items.subscription_id,
         invoice_items.invoice_created_at
