@@ -28,7 +28,7 @@ subscription_items as (
         balance_transactions.amount,
         balance_transactions.net_balance_change,
         balance_transactions.exchange_rate,
-        sub_items.plan_amount,
+        sub_items.plan_amount
     from
         {{ ref('stripe__invoice_line_items') }} sub_items
     left join subscription_invoice_number
@@ -52,7 +52,7 @@ subscription_payments as (
         amount,
         net_balance_change,
         exchange_rate,
-        plan_amount,
+        plan_amount
     from
         subscription_items
     left join
