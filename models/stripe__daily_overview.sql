@@ -1,3 +1,15 @@
+/*
+The following select statements aim to best recreate the value for MRR found
+on the Stripe Dashboard. They work filtering the data into a specific range
+and using only the data from that range to create active subscription and MRR
+values.
+
+As a baseline filter, all subscriptions not linked to a customer are discarded.
+
+We select distinct subscriptions from subscription_payments, taking the latest invoice
+from the date range specified.
+*/
+
 with daily_transactions as (
     select
         *
