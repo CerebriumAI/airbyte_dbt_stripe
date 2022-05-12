@@ -15,7 +15,7 @@ invoice_line_items_plan as (
 
 select
     id as invoice_line_item_id,
-    invoice as invoice_id,
+    invoice_id,
     subscription as subscription_id,
     plan_id,
     description as line_item_description,

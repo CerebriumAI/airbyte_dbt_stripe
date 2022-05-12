@@ -40,7 +40,7 @@ line_items_summary as (
     select 
         -- Invoices
         invoices.invoice_id,
-        invoices.invoice_number,
+        invoices.invoice_number as invoice_number,
         invoices.created_at as invoice_created_at,
         invoices.status,
         invoices.due_date,

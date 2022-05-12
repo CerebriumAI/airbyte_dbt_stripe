@@ -27,7 +27,7 @@ sub_stats as (
             select
                 count(
                     case when (
-                        filtered_subs.status = 'canceled' and
+                        filtered_subs.status = 'canceled'
                         and dt.date = date_trunc('day', filtered_subs.canceled_at)
                         and filtered_subs.customer_email is not null
                     ) 
@@ -131,13 +131,13 @@ sub_stats as (
                         and dt.date = date_trunc('day', filtered_subs.canceled_at)
                         and filtered_subs.customer_email is not null
                     ) 
-                    then filtered_subs.average_revenue / 100 end
+                    then filtered_subs.plan_amount / 100 end
                 ), 2), 0) as "churned_mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
-                    average_revenue,
+                    plan_amount,
                     status,
                     customer_email,
                     canceled_at
@@ -162,14 +162,14 @@ sub_stats as (
                         and filtered_subs.invoice_number = 1
                         and filtered_subs.customer_email is not null
                     ) 
-                    then filtered_subs.average_revenue / 100 end
+                    then filtered_subs.plan_amount / 100 end
                 ), 2), 0) as "new_mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
                     invoice_number,
-                    average_revenue,
+                    plan_amount,
                     status,
                     customer_email
                 from
@@ -195,13 +195,13 @@ sub_stats as (
                         )
                         and filtered_subs.customer_email is not null
                     ) 
-                    then filtered_subs.average_revenue / 100 end
+                    then filtered_subs.plan_amount / 100 end
                 ), 2), 0) as "mrr"
             from (
                 select distinct on (subscription_payments.subscription_id)
                     subscription_payments.date,
                     subscription_id,
-                    average_revenue,
+                    plan_amount,
                     status,
                     customer_email,
                     canceled_at

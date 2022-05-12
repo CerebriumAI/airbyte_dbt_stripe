@@ -4,7 +4,7 @@ with charges_card as (
         brand as card_brand,
         funding as card_funding,
         country as card_country
-    from {{ var('charges_card')}}
+    from {{ var('charges_card') }}
 )
 
 select
@@ -21,6 +21,6 @@ select
     card_brand,
     card_funding,
     card_country
-from {{ var('charges')}}
+from {{ var('charges') }}
 left join charges_card
     using(_airbyte_charges_hashid)
